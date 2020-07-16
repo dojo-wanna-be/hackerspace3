@@ -105,4 +105,39 @@ class AssignmentTest < ActiveSupport::TestCase
   test 'competition_event_registration' do
     assert @participant.competition_event_registration == @participating_comp_registration
   end
+
+  test 'cant_claim_the_same_badge_twice' do
+    assert_not @user.assignments.new(
+      title: ASSIGNEE,
+      assignable: badges(:one),
+      holder: holders(:one)
+    ).save
+
+    @user.assignments.destroy_all
+
+    assert @user.assignments.new(
+      title: ASSIGNEE,
+      assignable: badges(:one),
+      holder: holders(:one)
+    ).save
+  end
+
+  test 'cant_exceed_badge_capacity' do
+    @user.assignments.destroy_all
+    badges(:one).update(capacity: 0)
+
+    assert_not @user.assignments.new(
+      title: ASSIGNEE,
+      assignable: badges(:one),
+      holder: holders(:one)
+    ).save
+
+    badges(:one).update(capacity: nil)
+
+    assert @user.assignments.new(
+      title: ASSIGNEE,
+      assignable: badges(:one),
+      holder: holders(:one)
+    ).save
+  end
 end

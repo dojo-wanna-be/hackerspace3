@@ -30,6 +30,9 @@ Rails.application.routes.draw do
 
   resources :profiles, only: [:index, :show]
   resources :profile_pictures, only: [:edit, :update]
+  resources :badges, only: [] do
+    resources :claims, only: [:new, :create]
+  end
 
   namespace :flights do
     resources :registrations, only: [] do
@@ -79,6 +82,7 @@ Rails.application.routes.draw do
       end
       resources :events, only: :index
       resources :sponsors
+      resources :badges
       member do
         get 'aws_credits_requested'
         get 'sponsor_data_set_report'
