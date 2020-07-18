@@ -93,10 +93,9 @@ class AssignmentTest < ActiveSupport::TestCase
 
   test 'team can_only_join_team_if_registered_for_a_competition_event' do
     @participating_comp_registration.destroy
-    assignment = @team.assignments.create user: @user, title: TEAM_LEADER
+    assignments(:team_leader).destroy
+    assignment = @team.assignments.create user: @user, title: TEAM_LEADER, holder: @holder
     assert_not assignment.persisted?
-    # Fix: Something wrong with this test/method, will fail when another
-    # registration for @user is made as Not Attending.
     @participant.registrations.create event: @competition_event, status: ATTENDING, holder: @holder
     assignment = @team.assignments.create user: @user, title: TEAM_LEADER, holder: @holder
     assert assignment.persisted?
@@ -124,15 +123,12 @@ class AssignmentTest < ActiveSupport::TestCase
 
   test 'cant_exceed_badge_capacity' do
     @user.assignments.destroy_all
-    badges(:one).update(capacity: 0)
 
     assert_not @user.assignments.new(
       title: ASSIGNEE,
-      assignable: badges(:one),
+      assignable: badges(:two),
       holder: holders(:one)
     ).save
-
-    badges(:one).update(capacity: nil)
 
     assert @user.assignments.new(
       title: ASSIGNEE,

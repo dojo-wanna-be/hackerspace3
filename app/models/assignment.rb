@@ -29,10 +29,10 @@ class Assignment < ApplicationRecord
 
   before_validation :check_competition
 
+  validates :user_id, uniqueness: { scope: %i[assignable_id assignable_type title] }
   validates :title, inclusion: { in: VALID_ASSIGNMENT_TITLES }
   validate :can_only_join_team_if_registered_for_a_competition_event
   validate :correct_competition
-  validate :cant_claim_the_same_badge_twice
   validate :cant_exceed_badge_capacity
 
   after_save_commit :only_one_team_leader
@@ -56,15 +56,6 @@ class Assignment < ApplicationRecord
 
     errors.add :event,
       'Register for a competition event to join or create a team.'
-  end
-
-  # ENHANCEMENT: Validation to prevent assignment duplicates.
-  # Then this would not be needed
-  def cant_claim_the_same_badge_twice
-    return unless title == ASSIGNEE &&
-      user.assignments.where(assignable: assignable).count > 1
-
-    errors.add :badge, 'You have already claimed this badge.'
   end
 
   def cant_exceed_badge_capacity
